@@ -22,7 +22,7 @@ async def health_check():
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://pulse.digiservices.pk/"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
