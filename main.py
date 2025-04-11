@@ -349,7 +349,7 @@ async def export_to_excel(data: RequestData):
     ws.merge_cells("A1:H1")
     header_cell = ws["A1"]  # Removed the trailing comma that was making it a tuple
     header_cell.value = header_text
-    header_cell.font = Font(size=26, bold=True)
+    header_cell.font = Font(size=20, bold=True)
     header_cell.alignment = Alignment(
         horizontal="center", vertical="center", wrap_text=True
     )
