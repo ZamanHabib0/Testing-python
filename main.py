@@ -59,16 +59,16 @@ class RequestData(BaseModel):
 def convert_to_sqft(area):
     """ کنال-مرلہ-فٹ کو مربع فٹ میں تبدیل کریں """
     kanal, marla, feet = map(int, area.split('-'))
-    total_sqft = (kanal * 20 * 272.25) + (marla * 272.25) + feet
+    total_sqft = (kanal * 20 * 272) + (marla * 272) + feet
     return int(total_sqft)  # 👈 Return as integer
 
 
 def convert_from_sqft(total_sqft):
     """ مربع فٹ کو واپس کنال-مرلہ-فٹ میں تبدیل کریں """
-    kanal = int(total_sqft // (20 * 272.25))
-    remaining_sqft = total_sqft % (20 * 272.25)
-    marla = int(remaining_sqft // 272.25)
-    feet = round(remaining_sqft % 272.25)  # فٹ کو صحیح سے round کریں
+    kanal = int(total_sqft // (20 * 272))
+    remaining_sqft = total_sqft % (20 * 272)
+    marla = int(remaining_sqft // 272)
+    feet = round(remaining_sqft % 272)  # فٹ کو صحیح سے round کریں
     return f"{kanal}-{marla}-{feet}"
 
 
@@ -176,13 +176,13 @@ async def export_to_excel(data: RequestData):
 
         row_index += 1
          # میزان ونڈہ کیلکولیشن
-        wanda_total_marla = wanda_total_sqft / 272.25  # Convert total sqft to marlas
+        wanda_total_marla = wanda_total_sqft / 272  # Convert total sqft to marlas
 
         wanda_canal = int(wanda_total_marla // 20)  # 1 Canal = 20 Marlas
         wanda_remaining_marla = wanda_total_marla % 20  # Get remaining marlas after extracting canals
 
         wanda_marla = int(wanda_remaining_marla)  # Extract whole marlas
-        wanda_feet = round((wanda_remaining_marla - wanda_marla) * 272.25)  # Convert remaining fraction into feet
+        wanda_feet = round((wanda_remaining_marla - wanda_marla) * 272)  # Convert remaining fraction into feet
 
         wanda_raqbha = f"{wanda_canal}-{wanda_marla}-{wanda_feet}"
 
@@ -234,11 +234,11 @@ async def export_to_excel(data: RequestData):
                 # Convert Canal to Marla (1 Canal = 272 Marlas)
                 canal_in_marla = canal * 272
                 
-                # Convert Marla to Feet (1 Marla = 272.25 Feet)
-                marla_in_feet = marla * 272.25
+                # Convert Marla to Feet (1 Marla = 272 Feet)
+                marla_in_feet = marla * 272
                 
                 # Sum up the values in feet (including feet from the Canal, Marla, and direct Feet)
-                total_feet += canal_in_marla * 272.25 + marla_in_feet + feet
+                total_feet += canal_in_marla * 272 + marla_in_feet + feet
             except ValueError:
                 # Handle the case where the data is not in the expected format
                 print(f"Invalid format in row: {row}")
@@ -246,11 +246,11 @@ async def export_to_excel(data: RequestData):
     # After the loop, total_feet will contain the sum of all values in column F converted to feet
     print(f"Total sum in feet: {total_feet}")
 
-    total_marla = total_feet / 272.25  # Convert feet to Marlas
+    total_marla = total_feet / 272  # Convert feet to Marlas
     canal = int(total_marla // 272)  # Extract whole canals
     remaining_marla = total_marla % 272  # Get remaining marlas
     marla = int(remaining_marla)  # Extract whole marlas
-    feet = (remaining_marla - marla) * 272.25  # Convert leftover marlas into feet
+    feet = (remaining_marla - marla) * 272  # Convert leftover marlas into feet
 
     feet = int(feet)
     totalFeetRounded = int(total_feet)
