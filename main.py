@@ -397,7 +397,7 @@ async def export_to_excel(data: RequestData):
     # Step 0: Identify preserved rows
     preserved_rows = set()
     for row in range(start_row, max_row + 1):
-        for col in ["A", "B", "C", "D"]:
+        for col in ["B", "C", "D"]:
             val = str(ws[f"{col}{row}"].value).strip() if ws[f"{col}{row}"].value else ""
             if val in ("میزان ونڈہ", ":حصص"):
                 preserved_rows.add(row)
