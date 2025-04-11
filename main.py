@@ -363,6 +363,77 @@ async def export_to_excel(data: RequestData):
     ws["E6"].font = Font(size=14, bold=False)
     ws["E6"].alignment = Alignment(horizontal="center", vertical="center")
 
+
+    start_row = 7
+    max_row = ws.max_row
+
+    # ---------- Loop 1: Clean E, F, G, H without preservation ----------
+    for col_letter in ["E", "F", "G", "H"]:
+        non_empty_values = []
+
+        # Step 1: Collect valid data
+        for row in range(start_row, max_row + 1):
+            cell_value = ws[f"{col_letter}{row}"].value
+            if cell_value not in (None, "", "0-0-0"):
+                non_empty_values.append(cell_value)
+
+        # Step 2: Clear entire column
+        for row in range(start_row, max_row + 1):
+            ws[f"{col_letter}{row}"].value = None
+
+        # Step 3: Write valid data back upward
+        for i, value in enumerate(non_empty_values):
+            ws[f"{col_letter}{start_row + i}"].value = value
+
+        # Step 4: Fill the remaining rows with empty string
+        for j in range(len(non_empty_values), max_row - start_row + 1):
+            ws[f"{col_letter}{start_row + j}"].value = ""
+
+        # ---------- Loop 2: Clean A, B, C, D while preserving rows with "میزان ونڈہ" or ":حصص" ----------
+        # Step 0: Identify rows that contain "میزان ونڈہ" or ":حصص"
+    start_row = 7
+    max_row = ws.max_row
+
+    # Step 0: Identify preserved rows
+    preserved_rows = set()
+    for row in range(start_row, max_row + 1):
+        for col in ["A", "B", "C", "D"]:
+            val = str(ws[f"{col}{row}"].value).strip() if ws[f"{col}{row}"].value else ""
+            if val in ("میزان ونڈہ", ":حصص"):
+                preserved_rows.add(row)
+                break
+
+    # Step 1: Process columns A–D
+    for col_letter in ["A", "B", "C", "D"]:
+        non_empty_values = []
+
+        # Collect valid values
+        for row in range(start_row, max_row + 1):
+            if row in preserved_rows:
+               continue
+            cell_value = ws[f"{col_letter}{row}"].value
+            if cell_value not in (None, "", "0-0-0", "میزان ونڈہ", ":حصص"):
+                non_empty_values.append(cell_value)
+
+        # Clear all values (except preserved)
+        for row in range(start_row, max_row + 1):
+            if row not in preserved_rows:
+                ws[f"{col_letter}{row}"].value = None
+
+        # Refill values
+        write_row = start_row
+        value_index = 0
+        while write_row <= max_row:
+            if write_row in preserved_rows:
+                write_row += 1
+                continue
+            if value_index < len(non_empty_values):
+                ws[f"{col_letter}{write_row}"].value = non_empty_values[value_index]
+                value_index += 1
+            else:
+                ws[f"{col_letter}{write_row}"].value = ""
+            write_row += 1
+
     # Merge columns in row 2
     ws.merge_cells("C2:D2")  # Merging B and C
     ws.merge_cells("G2:H2")  # Merging F and G
@@ -453,9 +524,6 @@ async def export_to_excel(data: RequestData):
             # Define first and last data cell in the column
         first_cell = data_cells[0]
         last_cell = data_cells[-1]
-
-        print(first_cell)
-        print(last_cell)
 
 
         for cell in data_cells:
