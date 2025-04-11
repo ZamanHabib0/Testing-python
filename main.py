@@ -404,7 +404,7 @@ async def export_to_excel(data: RequestData):
                 break
 
     # Step 1: Process columns A–D
-    for col_letter in ["A", "B", "C", "D"]:
+    for col_letter in ["B", "C", "D"]:
         non_empty_values = []
 
         # Collect valid values
