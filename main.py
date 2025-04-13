@@ -11,6 +11,7 @@ import urllib
 import os
 from collections import defaultdict
 from openpyxl.utils import get_column_letter
+from openpyxl.worksheet.pagebreak import Break
 
 app = FastAPI()
 
@@ -283,7 +284,7 @@ async def export_to_excel(data: RequestData):
                 cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
     # Adjust column widths
-    column_widths = [30, 10, 10, 10, 30, 10, 7, 7]
+    column_widths = [32, 10, 10, 10, 33, 10, 7, 7]
     for i, width in enumerate(column_widths):
         ws.column_dimensions[chr(65 + i)].width = width
 
@@ -325,7 +326,7 @@ async def export_to_excel(data: RequestData):
     header_text = (
     f"نقشہ (ج) تقسیم اراضی\n\n"
     f"کھاتہ نمبر: {khataNumber} چک/موضع: {chak_number}  "
-    f"قانون گوئی: {KanonGoyi}  ضلع: {zila}"
+    f"تحصیل: {KanonGoyi}  ضلع: {zila}"
 )
 
     # Merge cells A1 to H1 and set the text box
@@ -549,20 +550,30 @@ async def export_to_excel(data: RequestData):
     ws.page_setup.horizontalCentered = True
     ws.page_setup.paperSize = 5
     ws.print_title_rows = '1:5'
+    # ws.row_breaks.append(37) 
 
-    ws.oddFooter.center.text = "Developed by Mannan 🚀"
-    ws.oddFooter.center.size = 12
+    # ws.oddFooter.center.size = 10
+    # ws.oddFooter.center.font = "Arial"
+
+    # # Footer text in center (with line below each label)
+    # ws.oddFooter.center.text = (
+    #     "&B\n\n\n\n\n\n\n\n\n\n\n"  # Adds extra line breaks
+    #     "دستخط پٹواری                              دستخط گرداور                                     دستخط ریونیو آفیسر\n"
+    #     "__________________________    ________________________    _______________________"
+    # )
+
+    empty_rows_to_add = 10  # Number of empty rows to add before the footer
+    for _ in range(empty_rows_to_add):
+        static_data.append([""] * 8)  # Assuming 8 columns in your table
+
+    # Then, add the footer text
+    ws.oddFooter.center.size = 10
     ws.oddFooter.center.font = "Arial"
-
-    # Footer text in center (with line below each label)
     ws.oddFooter.center.text = (
-        "&B\n\n\nدستخط پٹواری                              دستخط گرداور                                     دستخط ریونیو آفیسر\n"
+        "&B\n\n\n\n\n\n\n\n\n\n\n"  # Adds extra line breaks to push the text lower
+        "دستخط پٹواری                              دستخط گرداور                                     دستخط ریونیو آفیسر\n"
         "__________________________    ________________________    _______________________"
     )
-
-    # Optional: Set font and size
-    ws.oddFooter.center.font = "Arial"
-    ws.oddFooter.center.size = 12
 
 
 
