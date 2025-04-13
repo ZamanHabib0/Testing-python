@@ -216,49 +216,6 @@ async def export_to_excel(data: RequestData):
 
         row_index += 1
 
-    
-   # Initialize the total feet
-    total_feet = 0
-
-    # Iterate over the rows, starting from row 6 (index 5) up to the last row with data in column F
-    for row in static_data[5:]:  # Starting from row 6 (index 5)
-        column_f_value = row[5]  # Column F (index 5)
-
-        time_parts = column_f_value.split('-')
-        
-        if len(time_parts) == 3:
-            try:
-                canal = float(time_parts[0])  # Canal value
-                marla = float(time_parts[1])  # Marla value
-                feet = float(time_parts[2])  # Feet value
-                
-                # Convert Canal to Marla (1 Canal = 272 Marlas)
-                canal_in_marla = canal * 272
-                
-                # Convert Marla to Feet (1 Marla = 272 Feet)
-                marla_in_feet = marla * 272
-                
-                # Sum up the values in feet (including feet from the Canal, Marla, and direct Feet)
-                total_feet += canal_in_marla * 272 + marla_in_feet + feet
-            except ValueError:
-                # Handle the case where the data is not in the expected format
-                print(f"Invalid format in row: {row}")
-                
-    # After the loop, total_feet will contain the sum of all values in column F converted to feet
-    print(f"Total sum in feet: {total_feet}")
-
-    total_marla = total_feet / 272  # Convert feet to Marlas
-    canal = int(total_marla // 272)  # Extract whole canals
-    remaining_marla = total_marla % 272  # Get remaining marlas
-    marla = int(remaining_marla)  # Extract whole marlas
-    feet = (remaining_marla - marla) * 272  # Convert leftover marlas into feet
-
-    feet = int(feet)
-    totalFeetRounded = int(total_feet)
- 
-    totalRaqbha = f"{canal}-{marla}-{feet}"  # Store in variable as a string
-
-
     # Create workbook and worksheet
     wb = Workbook()
     ws = wb.active
@@ -354,6 +311,10 @@ async def export_to_excel(data: RequestData):
     header_cell.alignment = Alignment(
         horizontal="center", vertical="center", wrap_text=True
     )
+
+    totalFeetRounded = convert_to_sqft(data.mizan)
+
+
 
     ws["F6"] = data.mizan
 
@@ -570,10 +531,10 @@ async def export_to_excel(data: RequestData):
     ws.oddFooter.center.size = 10
     ws.oddFooter.center.font = "Arial"
     ws.oddFooter.center.text = (
-        "&B\n\n\n\n\n\n\n\n\n\n\n"  # Adds extra line breaks to push the text lower
-        "دستخط پٹواری                              دستخط گرداور                                     دستخط ریونیو آفیسر\n"
-        "__________________________    ________________________    _______________________"
+        "&B\n"
+        " __________________________   دستخط پٹواری   _______________________          دستخط گرداور    ________________________          دستخط ریونیو آفیسر"
     )
+
 
 
 
