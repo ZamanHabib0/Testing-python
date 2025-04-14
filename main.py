@@ -503,6 +503,36 @@ async def export_to_excel(data: RequestData):
                 right=right
             )
 
+    for row_info in rows_to_style:
+        row_index = row_info['index'] + 1  # Convert to 1-based index for openpyxl
+        ws.merge_cells(f"B{row_index}:C{row_index}")
+
+        # Set font and alignment for A, B, D columns
+        # Column A
+        cell = ws[f"A{row_index}"]
+        cell.font = Font(bold=True, size=14)
+        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        cell.border = thin_border  # Apply border to cell
+
+        # Column B
+        cell = ws[f"B{row_index}"]
+        cell.font = Font(bold=True, size=14)
+        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        cell.border = thin_border  # Apply border to cell
+
+                # Column B
+        cell = ws[f"C{row_index}"]
+        cell.font = Font(bold=True, size=14)
+        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        cell.border = thin_border  # Apply border to cell
+
+        # Column D
+        cell = ws[f"D{row_index}"]
+        cell.font = Font(bold=True, size=14)
+        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        cell.border = thin_border  # Apply border to cell
+
+
 
 
 
