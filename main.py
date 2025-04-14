@@ -533,6 +533,13 @@ async def export_to_excel(data: RequestData):
         cell.border = thin_border  # Apply border to cell
 
 
+        cell = ws[f"F6"]
+        cell.border = thin_border  # Apply border to cell
+
+        cell = ws[f"E6"]
+        cell.border = thin_border  # Apply border to cell
+
+
 
 
 
