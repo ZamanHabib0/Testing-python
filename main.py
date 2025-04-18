@@ -12,6 +12,7 @@ import os
 from collections import defaultdict
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.pagebreak import Break
+from openpyxl.styles import Font
 
 app = FastAPI()
 
@@ -53,7 +54,7 @@ class RequestData(BaseModel):
     chak : str
     district : str
     khata : str
-    mizan: str
+    # mizan: str
     taqseemkabad: list[TaqseemkabadEntry]
     taqseemSaPhala: list[TaqseemSaPhalaItem]
 
@@ -216,6 +217,47 @@ async def export_to_excel(data: RequestData):
 
         row_index += 1
 
+   # Initialize the total feet
+    total_feet = 0
+
+    # Iterate over the rows, starting from row 6 (index 5) up to the last row with data in column F
+    for row in static_data[5:]:  # Starting from row 6 (index 5)
+        column_f_value = row[5]  # Column F (index 5)
+
+        time_parts = column_f_value.split('-')
+        
+        if len(time_parts) == 3:
+            try:
+                canal = float(time_parts[0])  # Canal value
+                marla = float(time_parts[1])  # Marla value
+                feet = float(time_parts[2])  # Feet value
+                
+                # Convert Canal to Marla (1 Canal = 272 Marlas)
+                canal_in_marla = canal * 272
+                
+                # Convert Marla to Feet (1 Marla = 272 Feet)
+                marla_in_feet = marla * 272
+                
+                # Sum up the values in feet (including feet from the Canal, Marla, and direct Feet)
+                total_feet += canal_in_marla * 272 + marla_in_feet + feet
+            except ValueError:
+                # Handle the case where the data is not in the expected format
+                print(f"Invalid format in row: {row}")
+                
+    # After the loop, total_feet will contain the sum of all values in column F converted to feet
+    print(f"Total sum in feet: {total_feet}")
+
+    total_marla = total_feet / 272  # Convert feet to Marlas
+    canal = int(total_marla // 272)  # Extract whole canals
+    remaining_marla = total_marla % 272  # Get remaining marlas
+    marla = int(remaining_marla)  # Extract whole marlas
+    feet = (remaining_marla - marla) * 272  # Convert leftover marlas into feet
+
+    feet = int(feet)
+    totalFeetRounded = int(total_feet)
+ 
+    totalRaqbha = f"{canal}-{marla}-{feet}"  # Store in variable as a string
+
     # Create workbook and worksheet
     wb = Workbook()
     ws = wb.active
@@ -312,16 +354,16 @@ async def export_to_excel(data: RequestData):
         horizontal="center", vertical="center", wrap_text=True
     )
 
-    totalFeetRounded = convert_to_sqft(data.mizan)
+    totalFeetRounded = convert_to_sqft(totalRaqbha)
 
 
 
-    ws["F6"] = data.mizan
+    ws["F6"] = totalRaqbha
 
     ws["F6"].font = Font(size=14, bold=False)
     ws["F6"].alignment = Alignment(horizontal="center", vertical="center")
 
-    ws["E6"] = f"حصہ {totalFeetRounded}"
+    ws["E6"] = f"{totalFeetRounded} حصہ"
     ws["E6"].font = Font(size=14, bold=False)
     ws["E6"].alignment = Alignment(horizontal="center", vertical="center")
 
@@ -590,6 +632,18 @@ async def export_to_excel(data: RequestData):
     ws.page_margins.right = 0.2
     ws.page_margins.top = 0.5
     ws.page_margins.bottom = 0.5
+    
+    for row in ws.iter_rows(min_row=1, max_row=ws.max_row, min_col=1, max_col=8):
+        for cell in row:
+            existing_font = cell.font
+            cell.font = Font(
+                name="Jameel Noori Nastaleeq",
+                size=existing_font.size,
+                bold=existing_font.bold,
+                italic=existing_font.italic,
+               underline=existing_font.underline,
+                color=existing_font.color,
+        )
 
     # Save the file to a BytesIO object
     output = BytesIO()
@@ -609,3 +663,4 @@ async def export_to_excel(data: RequestData):
         },
     )
 
+# Hi
