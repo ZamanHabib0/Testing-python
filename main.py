@@ -122,7 +122,8 @@ async def export_to_excel(data: RequestData):
             wanda_total_sqft += convert_to_sqft(detail.raqbha)
             row_index += 1
             kila_base = ''.join(filter(str.isdigit, str(detail.kila)))
-            unique_kilas.add(kila_base)
+            kila_key = f"{detail.mustatil}_{kila_base}"
+            unique_kilas.add(kila_key)
 
         row = [f"ونڈہ نمبر {entry_index + 1}", wanda_total_sqft, "", ":حصص", "", "", "", ""]
         static_data.append(row)
@@ -607,6 +608,7 @@ async def export_to_excel(data: RequestData):
     # )
 
     empty_rows_to_add = 10  # Number of empty rows to add before the footer
+    
     for _ in range(empty_rows_to_add):
         static_data.append([""] * 8)  # Assuming 8 columns in your table
 
@@ -614,7 +616,10 @@ async def export_to_excel(data: RequestData):
     ws.oddFooter.center.size = 10
     ws.oddFooter.center.font = "Arial"
     ws.oddFooter.center.text = (
-        "&B\n"
+        "&B\n\n\n\n\n\n\n\n\n\n\n\n"
+        "\n "
+        
+        "\n "
         " __________________________   دستخط پٹواری   _______________________          دستخط گرداور    ________________________          دستخط ریونیو آفیسر"
     )
 
