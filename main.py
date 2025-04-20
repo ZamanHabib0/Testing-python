@@ -121,7 +121,8 @@ async def export_to_excel(data: RequestData):
         for detail in entry.details:
             wanda_total_sqft += convert_to_sqft(detail.raqbha)
             row_index += 1
-            unique_kilas.add(detail.kila)
+            kila_base = ''.join(filter(str.isdigit, str(detail.kila)))
+            unique_kilas.add(kila_base)
 
         row = [f"ونڈہ نمبر {entry_index + 1}", wanda_total_sqft, "", ":حصص", "", "", "", ""]
         static_data.append(row)
@@ -233,13 +234,13 @@ async def export_to_excel(data: RequestData):
                 feet = float(time_parts[2])  # Feet value
                 
                 # Convert Canal to Marla (1 Canal = 272 Marlas)
-                canal_in_marla = canal * 272
+                canal_in_marla = canal * 20 * 272
                 
                 # Convert Marla to Feet (1 Marla = 272 Feet)
                 marla_in_feet = marla * 272
                 
                 # Sum up the values in feet (including feet from the Canal, Marla, and direct Feet)
-                total_feet += canal_in_marla * 272 + marla_in_feet + feet
+                total_feet += canal_in_marla + marla_in_feet + feet
             except ValueError:
                 # Handle the case where the data is not in the expected format
                 print(f"Invalid format in row: {row}")
@@ -247,14 +248,18 @@ async def export_to_excel(data: RequestData):
     # After the loop, total_feet will contain the sum of all values in column F converted to feet
     print(f"Total sum in feet: {total_feet}")
 
-    total_marla = total_feet / 272  # Convert feet to Marlas
-    canal = int(total_marla // 272)  # Extract whole canals
-    remaining_marla = total_marla % 272  # Get remaining marlas
-    marla = int(remaining_marla)  # Extract whole marlas
-    feet = (remaining_marla - marla) * 272  # Convert leftover marlas into feet
+    
 
-    feet = int(feet)
+    total_marla = total_feet / 272  # Convert feet to Marlas
+    canal = int(total_marla // 20)  # Extract whole canals
+    remaining_marla = total_marla % 20  # Get remaining marlas
+    marla = int(remaining_marla)  # Extract whole marlas
+    remaining_feet = (remaining_marla - marla) * 272  # Convert leftover marlas into feet
+    feet = int(remaining_feet)
+
     totalFeetRounded = int(total_feet)
+    print(f"Total sum in feet: {totalFeetRounded}")
+
  
     totalRaqbha = f"{canal}-{marla}-{feet}"  # Store in variable as a string
 
@@ -358,13 +363,13 @@ async def export_to_excel(data: RequestData):
 
 
 
-    ws["F6"] = totalRaqbha
+    ws["F6"] = f"{totalRaqbha} میزان کھاتہ "
 
-    ws["F6"].font = Font(size=14, bold=False)
+    ws["F6"].font = Font(size=14, bold=True)
     ws["F6"].alignment = Alignment(horizontal="center", vertical="center")
 
     ws["E6"] = f"{totalFeetRounded} حصہ"
-    ws["E6"].font = Font(size=14, bold=False)
+    ws["E6"].font = Font(size=14, bold=True)
     ws["E6"].alignment = Alignment(horizontal="center", vertical="center")
 
 
@@ -458,7 +463,6 @@ async def export_to_excel(data: RequestData):
     ws.merge_cells("B4:B5")
     ws.merge_cells("A4:A5")
 
-    ws["E6"].font = Font(bold=False, size=14)
     ws["G6"].font = Font(bold=False, size=14)
     ws["F6"].alignment = Alignment(
         horizontal="center", vertical="center", wrap_text=True
@@ -663,4 +667,3 @@ async def export_to_excel(data: RequestData):
         },
     )
 
-# Hi
